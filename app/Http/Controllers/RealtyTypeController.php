@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\RelationDeleteException;
 use App\Models\RealtyType;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class RealtyTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return RealtyType[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Http\Response
+     * @return RealtyType[]|\Illuminate\Database\Eloquent\Collection|Response
      */
     public function index()
     {
@@ -21,7 +24,7 @@ class RealtyTypeController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(Request $request)
     {
@@ -36,7 +39,7 @@ class RealtyTypeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\RealtyType  $realtyType
+     * @param RealtyType $realtyType
      * @return RealtyType
      */
     public function show(RealtyType $realtyType)
@@ -48,7 +51,7 @@ class RealtyTypeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\RealtyType  $realtyType
+     * @param RealtyType $realtyType
      * @return RealtyType
      */
     public function update(Request $request, RealtyType $realtyType)
@@ -68,18 +71,32 @@ class RealtyTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\RealtyType  $realtyType
-     * @return \Illuminate\Http\Response
+     * @param RealtyType $realtyType
+     * @return bool
+     * @throws RelationDeleteException
      */
     public function destroy(RealtyType $realtyType)
     {
         // TODO: добавить удалдение фотоки
-        return $realtyType->delete();
+        try {
+            return $realtyType->delete();
+        } catch (QueryException $ex) {
+            throw new RelationDeleteException($realtyType->id);
+        }
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws RelationDeleteException
+     */
     public function destroyMultiple(Request $request)
     {
         // TODO: добавить удалдение фотоки
-        return RealtyType::whereIn('id', $request->id)->delete();
+        try {
+            return RealtyType::whereIn('id', $request->id)->delete();
+        } catch (QueryException $ex) {
+            throw new RelationDeleteException($request->id[0]);
+        }
     }
 }

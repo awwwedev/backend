@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\RelationDeleteException;
 use App\Http\Resources\EquipmentResource;
 use App\Models\Equipment;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 
 class EquipmentController extends Controller
@@ -13,9 +16,9 @@ class EquipmentController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return AnonymousResourceCollection
      */
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $equipments = Equipment::select('*');
 
@@ -32,10 +35,10 @@ class EquipmentController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return EquipmentResource
      */
-    public function store(Request $request)
+    public function store(Request $request): EquipmentResource
     {
         $equip = Equipment::make($request->only(['name', 'display_name', 'realty_type_id']));
         $equip->save();
@@ -57,11 +60,11 @@ class EquipmentController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param Equipment $equipment
      * @return EquipmentResource
      */
-    public function update(Request $request, Equipment $equipment)
+    public function update(Request $request, Equipment $equipment): EquipmentResource
     {
         $equip = $equipment->fill($request->only(['name', 'display_name', 'realty_type_id']));
         $equip->update();
@@ -76,18 +79,27 @@ class EquipmentController extends Controller
      * @return bool
      * @throws \Exception
      */
-    public function destroy(Equipment $equipment)
+    public function destroy(Equipment $equipment): bool
     {
-        return $equipment->delete();
+        try {
+            return $equipment->delete();
+        } catch (QueryException $ex) {
+            throw new RelationDeleteException($equipment->id);
+        }
     }
 
 
     /**
      * @param Request $request
      * @return mixed
+     * @throws RelationDeleteException
      */
     public function destroyMultiple(Request $request)
     {
-        return Equipment::whereIn('id', $request->id)->delete();
+        try {
+            return Equipment::whereIn('id', $request->id)->delete();
+        } catch (QueryException $ex) {
+            throw new RelationDeleteException($request->id[0]);
+        }
     }
 }

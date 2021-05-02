@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\RelationDeleteException;
 use App\Http\Resources\RealtyCollection;
 use App\Http\Resources\RealtyResource;
 use App\Models\Realty;
 use App\Models\RealtyEquipment;
+use App\Models\RealtyType;
+use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,7 +42,7 @@ class RealtyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return RealtyResource
      */
     public function store(Request $request)
@@ -62,10 +66,10 @@ class RealtyController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Realty  $realty
+     * @param Realty $realty
      * @return RealtyResource
      */
-    public function show(Realty $realty)
+    public function show(Realty $realty): RealtyResource
     {
         return RealtyResource::make($realty);
     }
@@ -73,11 +77,11 @@ class RealtyController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Realty  $realty
+     * @param Request $request
+     * @param Realty $realty
      * @return RealtyResource
      */
-    public function update(Request $request, Realty $realty)
+    public function update(Request $request, Realty $realty): RealtyResource
     {
         $realty = $realty->fill($request->only(['name', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) { return $model->id; });
@@ -116,10 +120,10 @@ class RealtyController extends Controller
                 })->merge($realty->photo);
             }
             if(!$realty->update()){
-                throw new \Exception('Cannot save property');
+                throw new Exception('Cannot save property');
             }
             return RealtyResource::make($realty);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return ['error'=>$e->getMessage()];
         }
     }
@@ -127,24 +131,45 @@ class RealtyController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Realty  $realty
+     * @param Realty $realty
      * @return bool
+     * @throws Exception
      */
-    public function destroy(Realty $realty)
+    public function destroy(Realty $realty): bool
     {
         // TODO: добавить удалдение фоток
-        return $realty->delete();
+        try {
+            $res = $realty->delete();
+            RealtyEquipment::where('realty_id', null)->delete();
+        } catch (QueryException $ex) {
+            throw new RelationDeleteException($realty->id);
+        }
+
+        return $res;
     }
 
+    /**
+     * @param Request $request
+     * @return int
+     * @throws RelationDeleteException
+     */
     public function destroyMultiple(Request $request): int
     {
-        // TODO: добавить удалдение фоток
-        RealtyEquipment::whereHas('realty', function ($q) use ($request) {
-            $q->whereIn('id', $request->id);
-        })->delete();
-        return Realty::destroy($request->id);
+        // TODO: добавить удалдение фотоки
+        try {
+            $res = Realty::whereIn('id', $request->id)->delete();
+            RealtyEquipment::where('realty_id', null)->delete();
+        } catch (QueryException $ex) {
+            throw new RelationDeleteException($request->id[0]);
+        }
+
+        return $res;
     }
 
+    /**
+     * @param Request $request
+     * @return array
+     */
     public function minMax(Request $request): array
     {
         $realty = $this->filter($request);

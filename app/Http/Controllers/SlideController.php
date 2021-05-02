@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Slide;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,10 +24,10 @@ class SlideController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return Response
      */
-    public function store(Request $request)
+    public function store(Request $request): Response
     {
         $slide = Slide::make($request->only(['header', 'content']));
         $slide->image = '/storage/' . $request->file('image')->store('images/slide', 'public');
@@ -39,10 +40,10 @@ class SlideController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Slide  $slide
+     * @param Slide $slide
      * @return Slide
      */
-    public function show(Slide $slide)
+    public function show(Slide $slide): Slide
     {
         return $slide;
     }
@@ -50,8 +51,8 @@ class SlideController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Slide  $slide
+     * @param Request $request
+     * @param Slide $slide
      * @return Slide
      */
     public function update(Request $request, Slide $slide)
@@ -70,8 +71,9 @@ class SlideController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Slide  $slide
-     * @return Response
+     * @param Slide $slide
+     * @return bool
+     * @throws Exception
      */
     public function destroy(Slide $slide)
     {
