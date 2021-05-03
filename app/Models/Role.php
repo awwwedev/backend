@@ -16,6 +16,10 @@ class Role extends Model
     use HasFactory;
 
     const ADMIN = 'ADMIN';
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+    ];
 
     /**
      * Get the own User
