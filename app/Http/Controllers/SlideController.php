@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Slide;
+use App\Traits\ControllersUpgrade\Sorting;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -10,23 +12,28 @@ use Illuminate\Support\Facades\Auth;
 
 class SlideController extends Controller
 {
+    use Sorting;
+
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return Slide[]|Collection|Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Slide::all();
+        $builder = $this->attachSorting(Slide::query(), $request);
+
+        return $builder->get();
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return Response
+     * @param Request $request
+     * @return Slide
      */
-    public function store(Request $request)
+    public function store(Request $request): Slide
     {
         $slide = Slide::make($request->only(['header', 'content']));
         $slide->image = '/storage/' . $request->file('image')->store('images/slide', 'public');
@@ -39,10 +46,10 @@ class SlideController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Slide  $slide
+     * @param Slide $slide
      * @return Slide
      */
-    public function show(Slide $slide)
+    public function show(Slide $slide): Slide
     {
         return $slide;
     }
@@ -50,8 +57,8 @@ class SlideController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Slide  $slide
+     * @param Request $request
+     * @param Slide $slide
      * @return Slide
      */
     public function update(Request $request, Slide $slide)
@@ -59,7 +66,6 @@ class SlideController extends Controller
         $slide->fill($request->only(['header', 'content']));
 
         if ($request->hasFile('image')) {
-            // TODO: добавить удалдение фотоки
             $slide->image = '/storage/' . $request->file('image')->store('images/slide', 'public');
         }
         $slide->update();
@@ -70,18 +76,25 @@ class SlideController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Slide  $slide
-     * @return Response
+     * @param Slide $slide
+     * @return bool
+     * @throws Exception
      */
-    public function destroy(Slide $slide)
+    public function destroy(Slide $slide): bool
     {
-        // TODO: добавить удалдение фотоки
         return $slide->delete();
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws Exception
+     */
     public function destroyMultiple(Request $request)
     {
-        // TODO: добавить удалдение фотоки
-        return Slide::whereIn('id', $request->id)->delete();
+        return Slide::select(['id', 'image'])->whereIn('id', $request->id)->get()
+            ->each(function (Slide $model) {
+                $model->delete();
+            })->count();
     }
 }

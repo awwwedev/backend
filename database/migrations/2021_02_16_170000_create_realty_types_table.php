@@ -17,6 +17,8 @@ class CreateRealtyTypesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('img_path');
+
+            $table->timestamps();
         });
     }
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\NewsCollection;
 use App\Models\News;
+use App\Traits\ControllersUpgrade\Searching;
+use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 
 class NewsController extends Controller
 {
+    use Sorting;
+    use Searching;
+
     /**
      * Display a listing of the resource.
      *
@@ -19,8 +24,11 @@ class NewsController extends Controller
      */
     public function index(Request $request): NewsCollection
     {
-        $request->has('perPage')?$count=$request->get('perPage'):$count=5;
-        return new NewsCollection(News::orderBy('id', 'DESC')->paginate($count));
+        $builder = $this->attachSorting(News::query(), $request);
+        $builder = $this->attachSearching($builder, $request);
+        $perPage = $request->get('perPage') ?? 10;
+
+        return new NewsCollection($builder->paginate($perPage));
     }
 
     /**
@@ -62,7 +70,6 @@ class NewsController extends Controller
         $news->fill($request->only(['header', 'content']));
 
         if ($request->hasFile('photo')) {
-            // TODO: добавить удалдение фотоки
             $news->photo = '/storage/' . $request->file('photo')->store('images/news', 'public');
         }
         $news->update();
@@ -79,17 +86,19 @@ class NewsController extends Controller
      */
     public function destroy(News $news): bool
     {
-        // TODO: добавить удалдение фотоки
         return $news->delete();
     }
 
     /**
      * @param Request $request
      * @return mixed
+     * @throws Exception
      */
     public function destroyMultiple(Request $request)
     {
-        // TODO: добавить удалдение фотоки
-        return News::whereIn('id', $request->id)->delete();
+        return News::select(['id', 'photo'])->whereIn('id', $request->id)->get()
+            ->each(function (News $model) {
+                $model->delete();
+            })->count();
     }
 }
