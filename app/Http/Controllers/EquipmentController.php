@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\RelationDeleteException;
 use App\Http\Resources\EquipmentResource;
+use App\Models\Contact;
 use App\Models\Equipment;
+use App\Traits\ControllersUpgrade\Sorting;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -12,6 +14,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class EquipmentController extends Controller
 {
+    use Sorting;
     /**
      * Display a listing of the resource.
      *
@@ -20,15 +23,15 @@ class EquipmentController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $equipments = Equipment::select('*');
+        $builder = $this->attachSorting(Equipment::query(), $request);
 
         if ($request->has('realtyTypeId')) {
-            $equipments->whereHas('realtyType', function($query) use ($request) {
+            $builder->whereHas('realtyType', function($query) use ($request) {
                 $query->where('realty_type_id', $request->realtyTypeId);
             });
         }
 
-        return EquipmentResource::collection($equipments->get());
+        return EquipmentResource::collection($builder->get());
     }
 
 

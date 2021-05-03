@@ -7,7 +7,9 @@ use App\Http\Resources\RealtyCollection;
 use App\Http\Resources\RealtyResource;
 use App\Models\Realty;
 use App\Models\RealtyEquipment;
+use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,27 +18,24 @@ use Illuminate\Support\Facades\Auth;
 
 class RealtyController extends Controller
 {
+    use Sorting;
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return RealtyCollection
      */
-    public function index(Request $request)
+    public function index(Request $request): RealtyCollection
     {
-        $realty = $this->filter($request);
-        $request->has('perPage') ? $perPage = $request->get('perPage') : $perPage = 10;
-
-        if ($request->has('sortBy')) {
-            $realty->orderBy($request->sortBy, $request->sortType ?? 'desc');
-        } else {
-            $realty->orderBy('created_at', 'desc');
-        }
+        $builder = $this->filter($request);
+        $builder = $this->attachSorting($builder, $request);
+        $perPage = $request->perPage ?? 10;
 
         if ($request->has('searchField') and $request->has('searchValue')) {
-            $realty->where($request->searchField, 'like', "%$request->searchValue%");
+            $builder->where($request->searchField, 'like', "%$request->searchValue%");
         }
 
-        return new RealtyCollection($realty->paginate($perPage));
+        return new RealtyCollection($builder->paginate($perPage));
     }
 
     /**
@@ -45,7 +44,7 @@ class RealtyController extends Controller
      * @param Request $request
      * @return RealtyResource
      */
-    public function store(Request $request)
+    public function store(Request $request): RealtyResource
     {
         $realty = Realty::make($request->only(['name', 'description', 'price', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realty->img_path = '/storage/' . $request->file('img_path')->store('images/realty', 'public');
@@ -207,11 +206,11 @@ class RealtyController extends Controller
     /**
      * @param Request $request
      *
-     * @return mixed
+     * @return Builder
      */
-    public function filter(Request $request)
+    public function filter(Request $request): Builder
     {
-        $realty = Realty::whereNotNull('description');
+        $realty = Realty::query();
 
         if ($request->has('equipments')) {
             $realty->whereHas('equipments', function($query) use ($request) {
@@ -254,6 +253,7 @@ class RealtyController extends Controller
         if ($request->has('pricePerMetrMax')) {
             $realty->where('price_per_metr', '<=', $request->get('pricePerMetrMax'));
         }
+
         return $realty;
     }
 }

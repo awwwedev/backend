@@ -17,6 +17,7 @@ class CreateRealtyEquipmentTable extends Migration
             $table->id();
             $table->foreignId("realty_id")->constrained()->cascadeOnDelete();
             $table->foreignId("equipment_id")->constrained();
+
             $table->timestamps();
         });
     }

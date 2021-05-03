@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\NewsCollection;
 use App\Models\News;
-use App\Models\RealtyType;
+use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class NewsController extends Controller
 {
+    use Sorting;
     /**
      * Display a listing of the resource.
      *
@@ -20,8 +21,10 @@ class NewsController extends Controller
      */
     public function index(Request $request): NewsCollection
     {
-        $request->has('perPage')?$count=$request->get('perPage'):$count=5;
-        return new NewsCollection(News::orderBy('id', 'DESC')->paginate($count));
+        $builder = $this->attachSorting(News::query(), $request);
+        $perPage = $request->get('perPage') ?? 10;
+
+        return new NewsCollection($builder->paginate($perPage));
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\RelationDeleteException;
 use App\Models\RealtyType;
+use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
@@ -12,14 +13,19 @@ use Illuminate\Http\Response;
 
 class RealtyTypeController extends Controller
 {
+    use Sorting;
+
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return RealtyType[]|Collection|Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return RealtyType::all();
+        $builder = $this->attachSorting(RealtyType::query(), $request);
+
+        return $builder->get();
     }
 
     /**

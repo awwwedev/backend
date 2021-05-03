@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Slide;
+use App\Traits\ControllersUpgrade\Sorting;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,23 +14,29 @@ use Illuminate\Support\Facades\Auth;
 
 class ContactController extends Controller
 {
+    use Sorting;
+
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return Contact[]|Collection|JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Contact::all();
+        $builder = Contact::query();
+        $request = $this->attachSorting($builder, $request);
+
+        return $request->get();
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return Response
+     * @return Contact
      */
-    public function store(Request $request)
+    public function store(Request $request): Contact
     {
         $contact = Contact::make($request->only(['value', 'type', 'is_rent_department']));
         $contact->user_id = Auth::user()->id;

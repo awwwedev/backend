@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Slide;
+use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -11,14 +12,19 @@ use Illuminate\Support\Facades\Auth;
 
 class SlideController extends Controller
 {
+    use Sorting;
+
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return Slide[]|Collection|Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Slide::all();
+        $builder = $this->attachSorting(Slide::query(), $request);
+
+        return $builder->get();
     }
 
     /**
