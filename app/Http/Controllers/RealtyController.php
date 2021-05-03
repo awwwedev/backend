@@ -43,7 +43,7 @@ class RealtyController extends Controller
      */
     public function store(Request $request)
     {
-        $realty = Realty::make($request->only(['name', 'description', 'price', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
+        $realty = Realty::make($request->only(['name','discount_sum', 'description', 'price', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realty->img_path = '/storage/' . $request->file('img_path')->store('images/realty', 'public');
         $realty->photo = collect($request->file('photo'))->map(function ($file) {
             return '/storage/' . $file->store('images/realty', 'public');
@@ -79,7 +79,7 @@ class RealtyController extends Controller
      */
     public function update(Request $request, Realty $realty)
     {
-        $realty = $realty->fill($request->only(['name', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
+        $realty = $realty->fill($request->only(['name','discount_sum', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) { return $model->id; });
 
         if (!$request->has('photo')) {
@@ -202,6 +202,9 @@ class RealtyController extends Controller
         }
         if ($request->has('areaMin')) {
             $realty->where('area', '>=', $request->get('areaMin'));
+        }
+        if ($request->has('discount')) {
+            $realty->where('discount_sum', '>=', 0);
         }
         if ($request->has('areaMax')) {
             $realty->where('area', '<=', $request->get('areaMax'));
