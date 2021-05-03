@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\NewsCollection;
 use App\Models\News;
+use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 class NewsController extends Controller
 {
     use Sorting;
+    use Searching;
+
     /**
      * Display a listing of the resource.
      *
@@ -22,6 +25,7 @@ class NewsController extends Controller
     public function index(Request $request): NewsCollection
     {
         $builder = $this->attachSorting(News::query(), $request);
+        $builder = $this->attachSearching($builder, $request);
         $perPage = $request->get('perPage') ?? 10;
 
         return new NewsCollection($builder->paginate($perPage));

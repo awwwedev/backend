@@ -7,6 +7,7 @@ use App\Http\Resources\RealtyCollection;
 use App\Http\Resources\RealtyResource;
 use App\Models\Realty;
 use App\Models\RealtyEquipment;
+use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Auth;
 class RealtyController extends Controller
 {
     use Sorting;
+    use Searching;
+
     /**
      * Display a listing of the resource.
      *
@@ -29,11 +32,8 @@ class RealtyController extends Controller
     {
         $builder = $this->filter($request);
         $builder = $this->attachSorting($builder, $request);
+        $builder = $this->attachSearching($builder, $request);
         $perPage = $request->perPage ?? 10;
-
-        if ($request->has('searchField') and $request->has('searchValue')) {
-            $builder->where($request->searchField, 'like', "%$request->searchValue%");
-        }
 
         return new RealtyCollection($builder->paginate($perPage));
     }
@@ -83,7 +83,9 @@ class RealtyController extends Controller
     public function update(Request $request, Realty $realty)
     {
         $realty = $realty->fill($request->only(['name', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
-        $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) { return $model->id; });
+        $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) {
+            return $model->id;
+        });
 
         if (!$request->has('photo')) {
             $realty->photo = [];
@@ -91,7 +93,7 @@ class RealtyController extends Controller
         if ($request->has('equipments')) {
             $requestEquip = collect($request->equipments);
 
-            if ($realty->getOriginal('type_id') !== (int) $realty->type_id) {
+            if ($realty->getOriginal('type_id') !== (int)$realty->type_id) {
                 $realty->equipments()->detach($realtyEquipIds);
                 $realty->equipments()->attach($requestEquip);
             } else {
@@ -106,23 +108,21 @@ class RealtyController extends Controller
         } else {
             $realty->equipments()->detach($realtyEquipIds);
         }
-        try {
-            if ($request->hasFile('img_path')) {
-                $realty->img_path = '/storage/' . $request->file('img_path')->store('images/realty', 'public');
-            }
 
-            if ($request->hasFile('newPhoto')) {
-                $realty->photo = collect($request->file('newPhoto'))->map(function ($file) {
-                    return '/storage/' . $file->store('images/realty', 'public');
-                })->merge($realty->photo);
-            }
-            if(!$realty->update()){
-                throw new Exception('Cannot save property');
-            }
-            return RealtyResource::make($realty);
-        } catch (Exception $e) {
-            return response(['message' => $e->getMessage()], 400);
+        if ($request->hasFile('img_path')) {
+            $realty->img_path = '/storage/' . $request->file('img_path')->store('images/realty', 'public');
         }
+        if ($request->hasFile('newPhoto')) {
+            $realty->photo = collect($request->file('newPhoto'))->map(function ($file) {
+                return '/storage/' . $file->store('images/realty', 'public');
+            })->merge($realty->photo);
+        }
+
+        if (!$realty->update()) {
+            return response('Не удалось обновить запись', 400);
+        }
+
+        return RealtyResource::make($realty);
     }
 
     /**
@@ -213,7 +213,7 @@ class RealtyController extends Controller
         $realty = Realty::query();
 
         if ($request->has('equipments')) {
-            $realty->whereHas('equipments', function($query) use ($request) {
+            $realty->whereHas('equipments', function ($query) use ($request) {
                 $query->whereIn('equipment.id', $request->equipments);
             });
         }
@@ -239,7 +239,7 @@ class RealtyController extends Controller
             $realty->where('longitude', '<=', $request->get('longitudeMin'));
         }
         if ($request->has('longitudeMax')) {
-            $realty->where('longitude',  '>=', $request->get('longitudeMax'));
+            $realty->where('longitude', '>=', $request->get('longitudeMax'));
         }
         if ($request->has('priceMin')) {
             $realty->where('price', '>=', $request->get('priceMin'));
