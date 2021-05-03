@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Slide;
+use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -25,9 +26,9 @@ class ContactController extends Controller
     public function index(Request $request)
     {
         $builder = Contact::query();
-        $request = $this->attachSorting($builder, $request);
+        $builder = $this->attachSorting($builder, $request);
 
-        return $request->get();
+        return $builder->get();
     }
 
     /**

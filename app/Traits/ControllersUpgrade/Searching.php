@@ -17,7 +17,7 @@ trait Searching
     public function attachSearching(Builder $builder, Request $request): Builder
     {
         if ($request->has('searchField') and $request->has('searchValue')) {
-            $builder->whereRaw("$request->searchField regexp :searchValue", [ ':searchValue' => $request->searchValue ]);
+            $builder->whereRaw("`$request->searchField` regexp ?", [ $request->searchValue ]);
         }
 
         return $builder;
