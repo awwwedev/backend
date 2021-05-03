@@ -7,10 +7,10 @@ use App\Http\Resources\RealtyCollection;
 use App\Http\Resources\RealtyResource;
 use App\Models\Realty;
 use App\Models\RealtyEquipment;
-use App\Models\RealtyType;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -79,9 +79,9 @@ class RealtyController extends Controller
      *
      * @param Request $request
      * @param Realty $realty
-     * @return RealtyResource
+     * @return RealtyResource|Response
      */
-    public function update(Request $request, Realty $realty): RealtyResource
+    public function update(Request $request, Realty $realty)
     {
         $realty = $realty->fill($request->only(['name', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) { return $model->id; });
@@ -108,12 +108,10 @@ class RealtyController extends Controller
             $realty->equipments()->detach($realtyEquipIds);
         }
         try {
-            // TODO: добавить удалдение фоток
             if ($request->hasFile('img_path')) {
                 $realty->img_path = '/storage/' . $request->file('img_path')->store('images/realty', 'public');
             }
 
-            // TODO: добавить удалдение фоток
             if ($request->hasFile('newPhoto')) {
                 $realty->photo = collect($request->file('newPhoto'))->map(function ($file) {
                     return '/storage/' . $file->store('images/realty', 'public');
@@ -124,7 +122,7 @@ class RealtyController extends Controller
             }
             return RealtyResource::make($realty);
         } catch (Exception $e) {
-            return ['error'=>$e->getMessage()];
+            return response(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -137,7 +135,6 @@ class RealtyController extends Controller
      */
     public function destroy(Realty $realty): bool
     {
-        // TODO: добавить удалдение фоток
         try {
             $res = $realty->delete();
             RealtyEquipment::where('realty_id', null)->delete();
@@ -151,13 +148,15 @@ class RealtyController extends Controller
     /**
      * @param Request $request
      * @return int
-     * @throws RelationDeleteException
+     * @throws RelationDeleteException | Exception
      */
     public function destroyMultiple(Request $request): int
     {
-        // TODO: добавить удалдение фотоки
         try {
-            $res = Realty::whereIn('id', $request->id)->delete();
+            $res = Realty::select(['id', 'photo', 'img_path'])->whereIn('id', $request->id)->get()
+                ->each(function (Realty $model) {
+                    $model->delete();
+                })->count();
             RealtyEquipment::where('realty_id', null)->delete();
         } catch (QueryException $ex) {
             throw new RelationDeleteException($request->id[0]);

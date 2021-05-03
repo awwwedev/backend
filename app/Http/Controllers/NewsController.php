@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\NewsCollection;
 use App\Models\News;
+use App\Models\RealtyType;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -62,7 +63,6 @@ class NewsController extends Controller
         $news->fill($request->only(['header', 'content']));
 
         if ($request->hasFile('photo')) {
-            // TODO: добавить удалдение фотоки
             $news->photo = '/storage/' . $request->file('photo')->store('images/news', 'public');
         }
         $news->update();
@@ -79,17 +79,19 @@ class NewsController extends Controller
      */
     public function destroy(News $news): bool
     {
-        // TODO: добавить удалдение фотоки
         return $news->delete();
     }
 
     /**
      * @param Request $request
      * @return mixed
+     * @throws Exception
      */
     public function destroyMultiple(Request $request)
     {
-        // TODO: добавить удалдение фотоки
-        return News::whereIn('id', $request->id)->delete();
+        return News::select(['id', 'photo'])->whereIn('id', $request->id)->get()
+            ->each(function (News $model) {
+                $model->delete();
+            })->count();
     }
 }

@@ -25,9 +25,9 @@ class SlideController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return Response
+     * @return Slide
      */
-    public function store(Request $request): Response
+    public function store(Request $request): Slide
     {
         $slide = Slide::make($request->only(['header', 'content']));
         $slide->image = '/storage/' . $request->file('image')->store('images/slide', 'public');
@@ -60,7 +60,6 @@ class SlideController extends Controller
         $slide->fill($request->only(['header', 'content']));
 
         if ($request->hasFile('image')) {
-            // TODO: добавить удалдение фотоки
             $slide->image = '/storage/' . $request->file('image')->store('images/slide', 'public');
         }
         $slide->update();
@@ -75,15 +74,21 @@ class SlideController extends Controller
      * @return bool
      * @throws Exception
      */
-    public function destroy(Slide $slide)
+    public function destroy(Slide $slide): bool
     {
-        // TODO: добавить удалдение фотоки
         return $slide->delete();
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws Exception
+     */
     public function destroyMultiple(Request $request)
     {
-        // TODO: добавить удалдение фотоки
-        return Slide::whereIn('id', $request->id)->delete();
+        return Slide::select(['id', 'image'])->whereIn('id', $request->id)->get()
+            ->each(function (Slide $model) {
+                $model->delete();
+            })->count();
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\RelationDeleteException;
 use App\Models\RealtyType;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -13,7 +15,7 @@ class RealtyTypeController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return RealtyType[]|\Illuminate\Database\Eloquent\Collection|Response
+     * @return RealtyType[]|Collection|Response
      */
     public function index()
     {
@@ -23,10 +25,10 @@ class RealtyTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return Response
+     * @param Request $request
+     * @return RealtyType
      */
-    public function store(Request $request)
+    public function store(Request $request): RealtyType
     {
         $realtyType = RealtyType::make($request->only(['name']));
         $realtyType->img_path = '/storage/' . $request->file('img_path')->store('images/realtyType', 'public');
@@ -42,7 +44,7 @@ class RealtyTypeController extends Controller
      * @param RealtyType $realtyType
      * @return RealtyType
      */
-    public function show(RealtyType $realtyType)
+    public function show(RealtyType $realtyType): RealtyType
     {
         return $realtyType;
     }
@@ -50,15 +52,14 @@ class RealtyTypeController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param RealtyType $realtyType
      * @return RealtyType
      */
-    public function update(Request $request, RealtyType $realtyType)
+    public function update(Request $request, RealtyType $realtyType): RealtyType
     {
         $realtyType->fill($request->only(['name']));
 
-        // TODO: добавить удалдение фотоки
         if ($request->hasFile('img_path')) {
             $realtyType->img_path = '/storage/' . $request->file('img_path')->store('images/realtyType', 'public');
         }
@@ -73,11 +74,10 @@ class RealtyTypeController extends Controller
      *
      * @param RealtyType $realtyType
      * @return bool
-     * @throws RelationDeleteException
+     * @throws RelationDeleteException | Exception
      */
-    public function destroy(RealtyType $realtyType)
+    public function destroy(RealtyType $realtyType): bool
     {
-        // TODO: добавить удалдение фотоки
         try {
             return $realtyType->delete();
         } catch (QueryException $ex) {
@@ -88,13 +88,15 @@ class RealtyTypeController extends Controller
     /**
      * @param Request $request
      * @return mixed
-     * @throws RelationDeleteException
+     * @throws RelationDeleteException | Exception
      */
     public function destroyMultiple(Request $request)
     {
-        // TODO: добавить удалдение фотоки
         try {
-            return RealtyType::whereIn('id', $request->id)->delete();
+            return RealtyType::select(['id', 'img_path'])->whereIn('id', $request->id)->get()
+                ->each(function (RealtyType $model) {
+                    $model->delete();
+                })->count();
         } catch (QueryException $ex) {
             throw new RelationDeleteException($request->id[0]);
         }
