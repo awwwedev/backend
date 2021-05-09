@@ -17,5 +17,8 @@ class RoleSeeder extends Seeder
         Role::create([
             'role' => Role::ADMIN
         ]);
+        Role::create([
+            'role' => Role::TENANT
+                     ]);
     }
 }
