@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\RealtyResource;
-use App\Http\Resources\UserCollection;
-use App\Models\Realty;
 use App\Models\Role;
-use App\Models\User ;
+use App\Models\User;
 use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
+use Exception;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -18,9 +19,11 @@ class UserController extends Controller
 {
     use Sorting;
     use Searching;
+
     /**
      * Display a listing of the resource.
-     *
+     * @param Request $request
+     * @return Builder[]|Collection
      */
     public function index(Request $request)
     {
@@ -28,6 +31,7 @@ class UserController extends Controller
 
         return $builder->get();
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -36,16 +40,16 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user=new User();
-        $user->name=$request->input('name');
-        $user->phone=$request->input('phone',null);
-        $user->email=$request->input('email');
-        $user->role_id=$request->input('role_id',Role::where('role',Role::TENANT)->first());
-        $user->password=Hash::make($request->input('password'));
-        if($user->save()){
+        $user = new User();
+        $user->name = $request->input('name');
+        $user->phone = $request->input('phone');
+        $user->email = $request->input('email');
+        $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
+        $user->password = Hash::make($request->input('password'));
+        if ($user->save()) {
             return $user;
-        }else{
-            return new Response(json_encode($user->errors()->all()),400);
+        } else {
+            return new Response(json_encode($user->errors()->all()), 400);
         }
     }
 
@@ -69,16 +73,16 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $user->name=$request->input('name');
-        $user->phone=$request->input('phone',null);
-        $user->email=$request->input('email');
-        $user->role_id=$request->input('role_id',Role::where('role',Role::TENANT)->first());
-        $user->password=Hash::make($request->input('password'));
+        $user->name = $request->input('name');
+        $user->phone = $request->input('phone');
+        $user->email = $request->input('email');
+        $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
+        $user->password = Hash::make($request->input('password'));
         $user->save();
-        if($user->save()){
+        if ($user->save()) {
             return $user;
-        }else{
-            return new Response(json_encode($user->errors()->all()),400);
+        } else {
+            return new Response(json_encode($user->errors()->all()), 400);
         }
     }
 
@@ -87,18 +91,20 @@ class UserController extends Controller
      *
      * @param User $user
      * @return Response
+     * @throws Exception
      */
-    public function destroy(User $user)
+    public function destroy(User $user): Response
     {
         $user->delete();
         return new Response();
     }
+
     /**
      * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Contracts\Auth\Authenticatable
- */
-    public function byToken()
+     * @return Authenticatable
+     */
+    public function byToken(): Authenticatable
     {
         return Auth::user();
     }

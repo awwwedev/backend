@@ -42,13 +42,7 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
-        Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
-        Route::get(
-            'roles',
-            function () {
-                return Role::all();
-            }
-        );
+        Route::get('roles', function () { return Role::all(); });
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
 
@@ -58,7 +52,7 @@ Route::middleware(['auth:sanctum'])->group(
         Route::apiResource('equipment', EquipmentController::class)->only(['update', 'store', 'destroy']);
         Route::apiResource('slide', SlideController::class)->only(['update', 'store', 'destroy']);
         Route::apiResource('contact', ContactController::class)->only(['update', 'store', 'destroy']);
-
+        Route::apiResource('user', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
 
         Route::delete('realty', [RealtyController::class, 'destroyMultiple']);
         Route::delete('realtyType', [RealtyTypeController::class, 'destroyMultiple']);
