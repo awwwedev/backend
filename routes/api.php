@@ -42,7 +42,7 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
-        Route::get('roles', function () { return Role::all(); });
+        Route::get('role', function () { return Role::all(); });
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
 
