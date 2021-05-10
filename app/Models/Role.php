@@ -16,6 +16,7 @@ class Role extends Model
     use HasFactory;
 
     const ADMIN = 'ADMIN';
+    const TENANT = 'TENANT';
     protected $casts = [
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
@@ -32,6 +33,11 @@ class Role extends Model
     public static function getAdmin()
     {
         return Role::whereRole(self::ADMIN);
+    }
+
+    public static function getTenant()
+    {
+        return Role::whereRole(self::TENANT);
     }
 
     protected $guarded = [];

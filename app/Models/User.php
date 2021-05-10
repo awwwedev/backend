@@ -78,4 +78,11 @@ class User extends Authenticatable
     public function typeContacts(){
         return $this->hasMany('App/Models/TypeContact');
     }
+
+    /**
+     * Get Slide models
+     */
+    public function roles(){
+        return $this->hasMany('App/Models/Role');
+    }
 }
