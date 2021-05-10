@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/admin', function () {
+Route::get('/admin/{any?}', function () {
     return view('admin-panel');
 })->where('any', '.+');
 
