@@ -9,6 +9,7 @@ use App\Http\Controllers\RealtyTypeController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\UserController;
+use App\Models\Role;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,9 +42,13 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
-
-        Route::apiResource('users', UserController::class)->only(['index','show','update', 'store', 'destroy']);
-
+        Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
+        Route::get(
+            'roles',
+            function () {
+                return Role::all();
+            }
+        );
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
 
