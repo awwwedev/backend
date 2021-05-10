@@ -14,12 +14,8 @@ class UserCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        //@todo finish
-        return array_merge(
-            parent::toArray($request),
-            [
-                '' => $this->realtyType->name,
-            ]
-        );
+        return [
+            'data' => $this->collection
+        ];
     }
 }

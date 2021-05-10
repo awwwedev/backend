@@ -41,6 +41,9 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
+
+        Route::apiResource('users', UserController::class)->only(['index','show','update', 'store', 'destroy']);
+
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
 
