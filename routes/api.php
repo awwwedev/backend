@@ -45,14 +45,14 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
-        Route::middleware(['roles'])->group(
+        Route::middleware(['tenant'])->group(
             function () {
                 Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
             }
         );
 
         //
-        Route::middleware(['roles'])->group(
+        Route::middleware(['admin'])->group(
             function () {
                 Route::get('obj1c/all', [Object1cController::class, 'getAll']);
                 Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
