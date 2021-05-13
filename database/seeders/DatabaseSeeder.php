@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
                 ContactsSeeder::class,
                 RealtyTypeSeeder::class,
                 EquipmentSeeder::class,
-                RealtySeeder::class
+                RealtySeeder::class,
+                Object1cSeeder::class
             ]
         );
     }

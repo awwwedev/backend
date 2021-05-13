@@ -82,7 +82,14 @@ class User extends Authenticatable
     /**
      * Get Slide models
      */
-    public function roles(){
-        return $this->hasMany('App/Models/Role');
+    public function role(){
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get object1c models
+     */
+    public function object1cs(){
+        return $this->hasMany(Object1c::class);
     }
 }
