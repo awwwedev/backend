@@ -28,13 +28,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('mail', [RequestController::class, 'index']);
-Route::prefix('realty')->group(
-    function () {
+Route::prefix('realty')->group(function () {
         Route::get('map', [RealtyController::class, 'mapRealty']);
         Route::get('count', [RealtyController::class, 'count']);
         Route::get('minMax', [RealtyController::class, 'minMax']);
-    }
-);
+});
 
 Route::apiResource('realtyType', RealtyTypeController::class)->only(['index', 'show']);
 Route::apiResource('news', NewsController::class)->only(['index', 'show']);
@@ -45,31 +43,19 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
-        Route::middleware(['tenant'])->group(
-            function () {
-                Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
-            }
-        );
+        Route::middleware(['tenant'])->group(function () {
+            Route::apiResource('object1c', Object1cController::class)->only(['index', 'show']);
+        });
 
-        //
         Route::middleware(['admin'])->group(
             function () {
                 Route::get('obj1c/all', [Object1cController::class, 'getAll']);
-                Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
-
-
-                Route::apiResource('users', UserController::class)->only(
-                    ['index', 'show', 'update', 'store', 'destroy']
-                );
-                Route::get(
-                    'roles',
-                    function () {
-                        return Role::all();
-                    }
-                );
+                Route::get('roles', function () { return Role::all(); });
                 Route::get('user/byToken', [UserController::class, 'byToken']);
                 Route::post('logout', [AuthController::class, 'logout']);
 
+                Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
+                Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
                 Route::apiResource('realty', RealtyController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('realtyType', RealtyTypeController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('news', NewsController::class)->only(['update', 'store', 'destroy']);
