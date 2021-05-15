@@ -45,9 +45,14 @@ Route::apiResource('equipment', EquipmentController::class)->only(['index', 'sho
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
+        Route::get('user/byToken', [UserController::class, 'byToken']);
+        Route::post('logout', [AuthController::class, 'logout']);
+
         Route::middleware(['tenant'])->group(
             function () {
                 Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
+                Route::get('contract', [Object1cController::class, 'getContract']);
+
             }
         );
 
@@ -67,8 +72,6 @@ Route::middleware(['auth:sanctum'])->group(
                         return Role::all();
                     }
                 );
-                Route::get('user/byToken', [UserController::class, 'byToken']);
-                Route::post('logout', [AuthController::class, 'logout']);
 
                 Route::apiResource('realty', RealtyController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('realtyType', RealtyTypeController::class)->only(['update', 'store', 'destroy']);

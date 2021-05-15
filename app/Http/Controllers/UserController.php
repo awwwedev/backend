@@ -94,9 +94,8 @@ class UserController extends Controller
         return new Response();
     }
     /**
-     * Remove the specified resource from storage.
      *
-     * @return \Illuminate\Contracts\Auth\Authenticatable
+     *
  */
     public function byToken()
     {
