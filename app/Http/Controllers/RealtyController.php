@@ -13,6 +13,8 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +37,7 @@ class RealtyController extends Controller
         $builder = $this->attachSearching($builder, $request);
         $perPage = $request->perPage ?? 10;
 
-        return new RealtyCollection($builder->paginate($perPage));
+        return RealtyCollection::make($builder->paginate($perPage));
     }
 
     /**
@@ -200,7 +202,9 @@ class RealtyController extends Controller
     public function mapRealty(Request $request)
     {
         $realty = $this->filter($request);
-        return $realty->get();
+
+        RealtyCollection::withoutWrapping();
+        return RealtyCollection::make($realty->get());
     }
 
     /**
