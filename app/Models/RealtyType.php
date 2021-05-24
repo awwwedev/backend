@@ -10,6 +10,8 @@ class RealtyType extends Model
 {
     use HasFactory;
 
+    public $timestamps=false;
+    protected $guarded = [];
     protected $casts = [
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
@@ -23,8 +25,12 @@ class RealtyType extends Model
         return $this->hasMany(Realty::class);
     }
 
-    public $timestamps=false;
-
-    protected $guarded = [];
+    /**
+     * @return HasMany
+     */
+    public function equipments(): HasMany
+    {
+        return $this->hasMany(Equipment::class);
+    }
 
 }

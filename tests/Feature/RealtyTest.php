@@ -55,9 +55,54 @@ class RealtyTest extends TestCase
         $this->assertDatabaseHas('realties', [
             'id' => $resData['id']
         ]);
-        self::assertTrue($disk->exists(str_replace('/storage/', '', $resData['img_path'])));
-        self::assertTrue($disk->exists(str_replace('/storage/', '', $resData['photo'][0])));
-        self::assertTrue($disk->exists(str_replace('/storage/', '', $resData['photo'][1])));
+        self::assertTrue($this->storageHaveFileInStore($resData['img_path'], $disk));
+        self::assertTrue($this->storageHaveFileInStore($resData['photo'][0], $disk));
+        self::assertTrue($this->storageHaveFileInStore($resData['photo'][1], $disk));
+    }
+
+    public function testUpdate()
+    {
+        Storage::fake('public');
+
+        $disk = Storage::disk('public');
+        $user = User::whereId(1)->first();
+        $newType = RealtyType::query()->inRandomOrder()->with('equipments')->first();
+        $realtyCurrent = Realty::first();
+        $newEquipmentsId = collect($newType->equipments)->map(fn ($equip) => $equip->id);
+        $realtyNewInst = Realty::factory()->make([
+            'created_at' => null,
+            'updated_at' => null,
+            'photo' => [],
+            'type_id' => $newType->id,
+        ]);
+        $realtyNewInst['newPhoto'] = [ UploadedFile::fake()->image('town1.jpg') ];
+        $realtyNewInst['img_path'] = UploadedFile::fake()->image('town.jpg');
+        $realtyNewInst['equipments'] = $newEquipmentsId;
+
+        $response = $this->actingAs($user)->putJson('api/realty/' . $realtyCurrent->id, $realtyNewInst->toArray());
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id'
+        ]);
+        $response->assertJson([
+            'type_id' => $newType->id,
+            'equipments' => ($newType->equipments ?? collect([]))->toArray()
+        ]);
+        $resData = $response->json();
+
+        $this->assertDatabaseHas('realties', [
+            'id' => $resData['id'],
+            'name' => $realtyNewInst->name,
+            'description' => $realtyNewInst->description,
+            'area' => $realtyNewInst->area
+        ]);
+
+        self::assertTrue($this->storageHaveFileInStore($resData['img_path'], $disk));
+        self::assertTrue($this->storageHaveFileInStore($resData['photo'][0], $disk));
+
+        self::assertFalse($this->storageHaveFileInStore($realtyCurrent->img_path, $disk));
+        self::assertFalse($this->storageHaveFileInStore($realtyCurrent->photo[0], $disk));
+        self::assertFalse($this->storageHaveFileInStore($realtyCurrent->photo[1], $disk));
     }
 
     public function testMap()
@@ -171,5 +216,10 @@ class RealtyTest extends TestCase
         $this->assertDatabaseMissing('realties', [
             'id' => $restiesId
         ]);
+    }
+
+    public function storageHaveFileInStore($filePath, $diskInst)
+    {
+        return $diskInst->exists(str_replace('/storage/', '', $filePath));
     }
 }
