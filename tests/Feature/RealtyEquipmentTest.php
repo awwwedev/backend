@@ -2,16 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Equipment;
 use App\Models\RealtyType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Tests\common\FileSupporting;
 use Tests\TestCase;
 
-class RealtyTypeTest extends TestCase
+class RealtyEquipmentTest extends TestCase
 {
     use RefreshDatabase;
     use FileSupporting;
@@ -21,82 +19,78 @@ class RealtyTypeTest extends TestCase
 
     public function testIndex()
     {
-        $response = $this->get('api/realtyType');
+        $response = $this->get('api/equipment');
 
         $response->assertOk();
         $response->assertJsonStructure([
             '*' => [
                 'id',
                 'name',
-                'img_path'
+                'realty_type_id'
             ]
         ]);
     }
 
     public function testCreate()
     {
-        Storage::fake('public');
-
-        $disk = Storage::disk('public');
         $user = User::whereId(1)->first();
+        $type = RealtyType::query()->inRandomOrder()->first();
         $inst = [
-            'name' => 'гараж'
+            'name' => 'гараж',
+            'realty_type_id' => $type->id
         ];
-        $inst['img_path'] = UploadedFile::fake()->image('town.jpg');
 
-        $response = $this->actingAs($user)->post('api/realtyType', $inst);
+        $response = $this->actingAs($user)->post('api/equipment', $inst);
         $response->assertStatus(201);
         $response->assertJsonStructure([
             'id',
             'name',
-            'img_path'
+            'realty_type_id'
         ]);
         $resData = $response->json();
-        $this->assertDatabaseHas('realty_types', [
+        $this->assertDatabaseHas('equipment', [
             'id' => $resData['id'],
-            'name' => $resData['name']
+            'name' => $resData['name'],
+            'realty_type_id' => $type->id
         ]);
-        self::assertTrue($this->storageHaveFileInStore($resData['img_path'], $disk));
     }
 
     public function testUpdate()
     {
-        Storage::fake('public');
-
-        $disk = Storage::disk('public');
         $user = User::whereId(1)->first();
-        $currentInst = RealtyType::query()->inRandomOrder()->first();
+        $type = RealtyType::query()->inRandomOrder()->first();
+        $currentInst = Equipment::query()->inRandomOrder()->first();
         $newInst = [
-            'name' => 'гараж'
+            'name' => 'гараж',
+            'realty_type_id' => $type->id
         ];
-        $newInst->img_path= UploadedFile::fake()->image('town.jpg');
 
-        $response = $this->actingAs($user)->putJson('api/realtyType/' . $currentInst->id, $newInst->toArray());
+        $response = $this->actingAs($user)->putJson('api/equipment/' . $currentInst->id, $newInst);
         $response->assertStatus(200);
         $response->assertJson([
             'id' => $currentInst->id,
-            'name' => $newInst->name
+            'name' => $newInst['name'],
+            'realty_type_id' => $type->id
         ]);
         $resData = $response->json();
-        $this->assertDatabaseHas('realty_types', [
+        $this->assertDatabaseHas('equipment', [
             'id' => $resData['id'],
-            'name' => $resData['name']
+            'name' => $resData['name'],
+            'realty_type_id' => $resData['realty_type_id']
         ]);
-        self::assertFalse($this->storageHaveFileInStore($newInst->img_path, $disk));
-        self::assertTrue($this->storageHaveFileInStore($resData['img_path'], $disk));
     }
 
     public function testShow()
     {
-        $inst = RealtyType::first();
-        $response = $this->get('api/realtyType/' . $inst->id);
+        $inst = Equipment::first();
+        $response = $this->get('api/equipment/' . $inst->id);
 
         $response->assertOk();
         $response->assertJsonStructure(
             [
                 'id',
                 'name',
-                'img_path'
+                'realty_type_id'
             ]
         );
     }
@@ -105,14 +99,14 @@ class RealtyTypeTest extends TestCase
     public function testMultipleDelete()
     {
         $user = User::query()->first();
-        $insts = RealtyType::query()->inRandomOrder()->limit(2)->get();
+        $insts = Equipment::query()->inRandomOrder()->limit(2)->get();
         $instId = collect($insts)->map(fn ($record) => $record->id);
-        $response = $this->actingAs($user)->deleteJson('api/realtyType', [
+        $response = $this->actingAs($user)->deleteJson('api/equipment', [
             'id' => $instId
         ]);
 
         $response->assertOk();
-        $this->assertDatabaseMissing('realty_types', [
+        $this->assertDatabaseMissing('equipment', [
             'id' => $instId
         ]);
     }
