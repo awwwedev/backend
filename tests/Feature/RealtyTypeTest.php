@@ -89,16 +89,15 @@ class RealtyTypeTest extends TestCase
 
     public function testShow()
     {
-        $news = News::first();
-        $response = $this->get('api/realtyType/' . $news->id);
+        $inst = RealtyType::first();
+        $response = $this->get('api/realtyType/' . $inst->id);
 
         $response->assertOk();
         $response->assertJsonStructure(
             [
                 'id',
-                'header',
-                'content',
-                'photo'
+                'name',
+                'img_path'
             ]
         );
     }
