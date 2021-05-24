@@ -16,6 +16,6 @@ class RelationDeleteException extends Exception
     }
 
     public function render() {
-        return response(array_merge([ 'allowCheckRelations' => true, 'message' => $this->message ], $this->recordId ? [ 'id' => $this->recordId ] : [] ), 400);
+        return response(array_merge([ 'allowCheckRelations' => true, 'message' => $this->message ], $this->recordId ? [ 'id' => $this->recordId ] : [] ), 409);
     }
 }
