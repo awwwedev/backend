@@ -8,14 +8,15 @@ use App\Models\RealtyType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Tests\common\FileSupporting;
 use Tests\TestCase;
 use Illuminate\Support\Facades\URL;
 
 class RealtyTest extends TestCase
 {
     use RefreshDatabase;
+    use FileSupporting;
 
     protected $seed = true;
 
@@ -168,7 +169,6 @@ class RealtyTest extends TestCase
         $response = $this->get('api/realty');
 
         $response->assertOk();
-        Log::debug($response->json());
         $response->assertJsonStructure([
             'data',
             'meta',
@@ -216,10 +216,5 @@ class RealtyTest extends TestCase
         $this->assertDatabaseMissing('realties', [
             'id' => $restiesId
         ]);
-    }
-
-    public function storageHaveFileInStore($filePath, $diskInst)
-    {
-        return $diskInst->exists(str_replace('/storage/', '', $filePath));
     }
 }

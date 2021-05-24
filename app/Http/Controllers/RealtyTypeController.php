@@ -19,7 +19,7 @@ class RealtyTypeController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return RealtyType[]|Collection|Response
+     * @return Collection|RealtyType[]
      */
     public function index(Request $request)
     {
