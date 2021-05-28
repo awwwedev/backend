@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(
         Route::middleware(['tenant'])->group(
             function () {
                 Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
+
                 Route::get('contract', [Object1cController::class, 'getContract']);
 
             }
