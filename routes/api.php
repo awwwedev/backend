@@ -53,6 +53,11 @@ Route::middleware(['auth:sanctum'])->group(
                 Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
 
                 Route::get('contract', [Object1cController::class, 'getContract']);
+                Route::get('check', [Object1cController::class, 'getBill']);
+                Route::get('bills', [Object1cController::class, 'getBills']);
+                Route::get('debts', [Object1cController::class, 'getDebts']);
+                Route::get('counters', [Object1cController::class, 'getCounters']);
+                Route::get('statistics', [Object1cController::class, 'getStatistics']);
 
             }
         );
