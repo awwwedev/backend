@@ -21,8 +21,12 @@ class TicketMessageFactory extends Factory
      */
     public function definition()
     {
+        $date = $this->faker->dateTimeBetween('-5years');
+
         return [
-            //
+            'message' => $this->faker->realText(random_int(20, 40)),
+            'created_at' => $date,
+            'updated_at' => $date
         ];
     }
 }

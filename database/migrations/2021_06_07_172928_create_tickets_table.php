@@ -15,6 +15,10 @@ class CreateTicketsTable extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId("user_id")->constrained();
+            $table->tinyInteger("status")->default(0);
+
             $table->timestamps();
         });
     }

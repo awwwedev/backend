@@ -15,6 +15,11 @@ class CreateTicketMessagesTable extends Migration
     {
         Schema::create('ticket_messages', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId("ticket_id")->constrained();
+            $table->foreignId("user_id")->constrained();
+            $table->text("message");
+
             $table->timestamps();
         });
     }

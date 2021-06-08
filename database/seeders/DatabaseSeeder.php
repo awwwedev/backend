@@ -24,7 +24,8 @@ class DatabaseSeeder extends Seeder
                 RealtyTypeSeeder::class,
                 EquipmentSeeder::class,
                 RealtySeeder::class,
-                Object1cSeeder::class
+                Object1cSeeder::class,
+                TicketSeeder::class,
             ]
         );
     }

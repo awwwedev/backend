@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
+use App\Models\Ticket;
+use App\Models\TicketMessage;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +43,13 @@ class UsersSeeder extends Seeder
             ],
         ];
 
-        User::insert($users);
+        collect($users)->each(function ($user) {
+            User::factory()
+                ->state($user)
+                ->has(Ticket::factory()
+                    ->count(10))
+                ->create();
+        });
+
     }
 }
