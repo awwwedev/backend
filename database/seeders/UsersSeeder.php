@@ -47,7 +47,7 @@ class UsersSeeder extends Seeder
             User::factory()
                 ->state($user)
                 ->has(Ticket::factory()
-                    ->count(10))
+                    ->count(1))
                 ->create();
         });
 

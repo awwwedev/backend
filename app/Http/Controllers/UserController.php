@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\RealtyResource;
 use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use App\Models\Realty;
 use App\Models\Role;
-use App\Models\User ;
+use App\Models\Ticket;
+use App\Models\User;
 use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,16 +21,18 @@ class UserController extends Controller
 {
     use Sorting;
     use Searching;
+
     /**
      * Display a listing of the resource.
      *
      */
-    public function index(Request $request)
+    public function index(Request $request): UserCollection
     {
         $builder = $this->attachSorting(User::query(), $request);
 
-        return $builder->get();
+        return new UserCollection($builder->get());
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -36,16 +41,16 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user=new User();
-        $user->name=$request->input('name');
-        $user->phone=$request->input('phone',null);
-        $user->email=$request->input('email');
-        $user->role_id=$request->input('role_id',Role::where('role',Role::TENANT)->first());
-        $user->password=Hash::make($request->input('password'));
-        if($user->save()){
+        $user = new User();
+        $user->name = $request->input('name');
+        $user->phone = $request->input('phone');
+        $user->email = $request->input('email');
+        $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
+        $user->password = Hash::make($request->input('password'));
+        if ($user->save()) {
             return $user;
-        }else{
-            return new Response(json_encode($user->errors()->all()),400);
+        } else {
+            return new Response(json_encode($user->errors()->all()), 400);
         }
     }
 
@@ -69,16 +74,16 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $user->name=$request->input('name');
-        $user->phone=$request->input('phone',null);
-        $user->email=$request->input('email');
-        $user->role_id=$request->input('role_id',Role::where('role',Role::TENANT)->first());
-        $user->password=Hash::make($request->input('password'));
+        $user->name = $request->input('name');
+        $user->phone = $request->input('phone', null);
+        $user->email = $request->input('email');
+        $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
+        $user->password = Hash::make($request->input('password'));
         $user->save();
-        if($user->save()){
+        if ($user->save()) {
             return $user;
-        }else{
-            return new Response(json_encode($user->errors()->all()),400);
+        } else {
+            return new Response(json_encode($user->errors()->all()), 400);
         }
     }
 
@@ -93,10 +98,11 @@ class UserController extends Controller
         $user->delete();
         return new Response();
     }
+
     /**
      *
      *
- */
+     */
     public function byToken()
     {
         return Auth::user();

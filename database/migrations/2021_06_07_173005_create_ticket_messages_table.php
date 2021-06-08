@@ -17,8 +17,10 @@ class CreateTicketMessagesTable extends Migration
             $table->id();
 
             $table->foreignId("ticket_id")->constrained();
-            $table->foreignId("user_id")->constrained();
+            $table->foreignId("user_id")->nullable()->constrained();
             $table->text("message");
+            $table->string("phone")->nullable();
+            $table->string("fio")->nullable();
 
             $table->timestamps();
         });

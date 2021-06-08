@@ -9,6 +9,7 @@ use \App\Http\Controllers\RealtyController;
 use App\Http\Controllers\RealtyTypeController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SlideController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Models\Role;
 use App\Models\User;
@@ -42,11 +43,15 @@ Route::apiResource('slide', SlideController::class)->only(['index', 'show']);
 Route::apiResource('contact', ContactController::class)->only(['index', 'show']);
 Route::apiResource('realty', RealtyController::class)->only(['index', 'show']);
 Route::apiResource('equipment', EquipmentController::class)->only(['index', 'show']);
+Route::apiResource('ticket', TicketController::class)->only(['index', 'store']);
+Route::get('ticket/count', [TicketController::class, 'count']);
+
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
+
 
         Route::middleware(['tenant'])->group(
             function () {
@@ -69,9 +74,9 @@ Route::middleware(['auth:sanctum'])->group(
                 Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
 
 
-                Route::apiResource('users', UserController::class)->only(
-                    ['index', 'show', 'update', 'store', 'destroy']
-                );
+                Route::apiResource('user', UserController::class)
+                    ->only(['index', 'show', 'update', 'store', 'destroy']);
+
                 Route::get(
                     'roles',
                     function () {
