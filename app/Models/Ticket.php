@@ -27,8 +27,8 @@ class Ticket extends Model
     /**
      * @return HasMany
      */
-    public function ticketMessages(): HasMany
+    public function messages(): HasMany
     {
-        return $this->hasMany(Ticket::class);
+        return $this->hasMany(TicketMessage::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\RealtyResource;
+use App\Http\Resources\TicketMessageCollection;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\Realty;
@@ -108,4 +109,9 @@ class UserController extends Controller
         return Auth::user();
     }
 
+    public function ticketMessages(Request $request, User $user)
+    {
+        $builder = $user->ticket()->with('messages')->first()->messages()->orderBy('created_at', 'asc');
+        return TicketMessageCollection::make($builder->get());
+    }
 }

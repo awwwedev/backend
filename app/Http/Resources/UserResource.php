@@ -16,14 +16,14 @@ class UserResource extends JsonResource
      */
     public function toArray($request): array
     {
-        return [
-            'role' => $this->role->role,
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'hasNewMessage' => $this->when($request->has('withHasNewMessage'),
-                $this->ticket()->whereStatus(Ticket::STATE_NEW)->count()
-            )
-        ];
+        return array_merge(
+            parent::toArray($request),
+            [
+                'role' => $this->role->role,
+                'hasNewMessage' => $this->when($request->has('withHasNewMessage'),
+                    $this->ticket()->whereStatus(Ticket::STATE_NEW)->count()
+                )
+            ]
+        );
     }
 }

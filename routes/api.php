@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(
     function () {
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
+        Route::get('user/{user}/messages', [UserController::class, 'ticketMessages']);
 
 
         Route::middleware(['tenant'])->group(
@@ -78,7 +79,7 @@ Route::middleware(['auth:sanctum'])->group(
                     ->only(['index', 'show', 'update', 'store', 'destroy']);
 
                 Route::get(
-                    'roles',
+                    'role',
                     function () {
                         return Role::all();
                     }
