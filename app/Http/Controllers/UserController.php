@@ -12,6 +12,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -48,7 +49,10 @@ class UserController extends Controller
         $user->email = $request->input('email');
         $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
         $user->password = Hash::make($request->input('password'));
+
         if ($user->save()) {
+            $user->ticket()->save(new Ticket());
+
             return $user;
         } else {
             return new Response(json_encode($user->errors()->all()), 400);
@@ -79,8 +83,10 @@ class UserController extends Controller
         $user->phone = $request->input('phone', null);
         $user->email = $request->input('email');
         $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
-        $user->password = Hash::make($request->input('password'));
-        $user->save();
+
+        if ($request->input('password'))
+            $user->password = Hash::make($request->input('password'));
+
         if ($user->save()) {
             return $user;
         } else {

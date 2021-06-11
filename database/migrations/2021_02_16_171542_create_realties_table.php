@@ -20,10 +20,11 @@ class CreateRealtiesTable extends Migration
             $table->string('name');
             $table->float('area');
             $table->integer('price');
-            $table->integer('discount_sum')->nullable();
+            $table->integer('discount_sum')->default(0);
             $table->integer('price_per_metr');
             $table->text('latitude');
             $table->text('longitude');
+            $table->text("short_description");
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->json('photo');
             $table->unsignedBigInteger('type_id');

@@ -18,6 +18,7 @@ class CreateNewsTable extends Migration
             $table->text("photo");
             $table->text("header");
             $table->text("content");
+            $table->text("short_description");
 
             $table->foreignId("user_id")->constrained();
 

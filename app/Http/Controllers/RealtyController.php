@@ -46,7 +46,7 @@ class RealtyController extends Controller
      */
     public function store(Request $request): RealtyResource
     {
-        $realty = Realty::make($request->only(['name', 'discount_sum', 'description', 'price', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
+        $realty = Realty::make($request->only(['name', 'short_description', 'discount_sum', 'description', 'price', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realty->img_path = '/storage/' . $request->file('img_path')->store('images/realty', 'public');
         $realty->photo = collect($request->file('photo'))->map(function ($file) {
             return '/storage/' . $file->store('images/realty', 'public');
@@ -82,7 +82,7 @@ class RealtyController extends Controller
      */
     public function update(Request $request, Realty $realty)
     {
-        $realty = $realty->fill($request->only(['name', 'discount_sum', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
+        $realty = $realty->fill($request->only(['name', 'short_description', 'discount_sum', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
         $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) {
             return $model->id;
         });

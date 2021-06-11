@@ -41,6 +41,7 @@ class RealtyFactory extends Factory
             'price_per_metr' => $price_per_metr,
             'latitude' => mt_rand( 44450000, 44700000) / 1000000,
             'longitude' => mt_rand( 33450000, 33700000) / 1000000,
+            'short_description' => $this->faker->unique()->realText(),
             'user_id' => 1,
             'img_path' => $this->faker->randomElement($photos),
             'type_id' => random_int(1, 4),

@@ -39,7 +39,7 @@ class NewsController extends Controller
      */
     public function store(Request $request)
     {
-        $news = News::make($request->only(['header', 'content']));
+        $news = News::make($request->only(['header', 'content', 'short_description']));
         $news->photo = '/storage/' . $request->file('photo')->store('images/news', 'public');
         $news->user_id = Auth::user()->id;
         $news->save();
@@ -67,7 +67,7 @@ class NewsController extends Controller
      */
     public function update(Request $request, News $news): News
     {
-        $news->fill($request->only(['header', 'content']));
+        $news->fill($request->only(['header', 'content', 'short_description']));
 
         if ($request->hasFile('photo')) {
             $news->photo = '/storage/' . $request->file('photo')->store('images/news', 'public');

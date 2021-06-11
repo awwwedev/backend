@@ -29,11 +29,16 @@ class NewsFactory extends Factory
             '/storage/image/town3.png',
             '/storage/image/town4.png',
         ];
+        $date = $this->faker->dateTimeBetween('-5years');
+
         return [
             'header' => $this->faker->unique()->realText(70),
             'content' => $this->faker->unique()->realText(),
+            'short_description' => $this->faker->unique()->realText(),
             'user_id' => 1,
-            'photo' => $this->faker->randomElement($photos)
+            'photo' => $this->faker->randomElement($photos),
+            'created_at' => $date,
+            'updated_at' => $date
         ];
     }
 }
