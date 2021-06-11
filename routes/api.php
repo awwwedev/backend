@@ -39,26 +39,53 @@ Route::apiResource('slide', SlideController::class)->only(['index', 'show']);
 Route::apiResource('contact', ContactController::class)->only(['index', 'show']);
 Route::apiResource('realty', RealtyController::class)->only(['index', 'show']);
 Route::apiResource('equipment', EquipmentController::class)->only(['index', 'show']);
+Route::apiResource('ticket', TicketController::class)->only(['index', 'store']);
+Route::get('ticket/count', [TicketController::class, 'count']);
+
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
-        Route::get('role', function () { return Role::all(); });
+        Route::get('role', function () {
+            return Role::all();
+        });
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
+        Route::get('user/{user}/messages', [UserController::class, 'ticketMessages']);
+        Route::apiResource('auth/ticket-message', TicketMessageController::class)->only(['index', 'store']);
 
-        Route::apiResource('realty', RealtyController::class)->only(['update', 'store', 'destroy']);
-        Route::apiResource('realtyType', RealtyTypeController::class)->only(['update', 'store', 'destroy']);
-        Route::apiResource('news', NewsController::class)->only(['update', 'store', 'destroy']);
-        Route::apiResource('equipment', EquipmentController::class)->only(['update', 'store', 'destroy']);
-        Route::apiResource('slide', SlideController::class)->only(['update', 'store', 'destroy']);
-        Route::apiResource('contact', ContactController::class)->only(['update', 'store', 'destroy']);
-        Route::apiResource('user', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
 
-        Route::delete('realty', [RealtyController::class, 'destroyMultiple']);
-        Route::delete('realtyType', [RealtyTypeController::class, 'destroyMultiple']);
-        Route::delete('news', [NewsController::class, 'destroyMultiple']);
-        Route::delete('equipment', [EquipmentController::class, 'destroyMultiple']);
-        Route::delete('slide', [SlideController::class, 'destroyMultiple']);
-        Route::delete('contact', [ContactController::class, 'destroyMultiple']);
+        Route::middleware(['tenant'])->group(
+            function () {
+                Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
+
+                Route::get('contract', [Object1cController::class, 'getContract']);
+                Route::get('check', [Object1cController::class, 'getBill']);
+                Route::get('bills', [Object1cController::class, 'getBills']);
+                Route::get('debts', [Object1cController::class, 'getDebts']);
+                Route::get('counters', [Object1cController::class, 'getCounters']);
+                Route::get('statistics', [Object1cController::class, 'getStatistics']);
+            }
+        );
+
+        //
+        Route::middleware(['admin'])->group(
+            function () {
+                Route::get('obj1c/all', [Object1cController::class, 'getAll']);
+                Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
+
+
+                Route::apiResource('user', UserController::class)
+                    ->only(['index', 'show', 'update', 'store', 'destroy']);
+                Route::apiResource('user', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
+                Route::get('role', function () { return Role::all(); });
+
+                Route::delete('realty', [RealtyController::class, 'destroyMultiple']);
+                Route::delete('realtyType', [RealtyTypeController::class, 'destroyMultiple']);
+                Route::delete('news', [NewsController::class, 'destroyMultiple']);
+                Route::delete('equipment', [EquipmentController::class, 'destroyMultiple']);
+                Route::delete('slide', [SlideController::class, 'destroyMultiple']);
+                Route::delete('contact', [ContactController::class, 'destroyMultiple']);
+            }
+        );
     }
 );

@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\RealtyResource;
+use App\Http\Resources\TicketMessageCollection;
+use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
+use App\Models\Realty;
 use App\Models\Role;
+use App\Models\Ticket;
 use App\Models\User;
 use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
-use Exception;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -22,14 +26,13 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @param Request $request
-     * @return Builder[]|Collection
+     *
      */
-    public function index(Request $request)
+    public function index(Request $request): UserCollection
     {
         $builder = $this->attachSorting(User::query(), $request);
 
-        return $builder->get();
+        return new UserCollection($builder->get());
     }
 
     /**
@@ -46,7 +49,10 @@ class UserController extends Controller
         $user->email = $request->input('email');
         $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
         $user->password = Hash::make($request->input('password'));
+
         if ($user->save()) {
+            $user->ticket()->save(new Ticket());
+
             return $user;
         } else {
             return new Response(json_encode($user->errors()->all()), 400);
@@ -74,11 +80,13 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $user->name = $request->input('name');
-        $user->phone = $request->input('phone');
+        $user->phone = $request->input('phone', null);
         $user->email = $request->input('email');
         $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
-        $user->password = Hash::make($request->input('password'));
-        $user->save();
+
+        if ($request->input('password'))
+            $user->password = Hash::make($request->input('password'));
+
         if ($user->save()) {
             return $user;
         } else {
@@ -91,22 +99,19 @@ class UserController extends Controller
      *
      * @param User $user
      * @return Response
-     * @throws Exception
      */
-    public function destroy(User $user): Response
+    public function destroy(User $user)
     {
         $user->delete();
         return new Response();
     }
 
     /**
-     * Remove the specified resource from storage.
      *
-     * @return Authenticatable
+     *
      */
-    public function byToken(): Authenticatable
+    public function byToken()
     {
         return Auth::user();
     }
-
 }

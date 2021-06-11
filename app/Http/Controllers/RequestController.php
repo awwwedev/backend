@@ -12,9 +12,9 @@ class RequestController extends Controller
     {
         try {
             $mailRecord = new Model();
-            $mailRecord->message = $request->get('message');
-            $mailRecord->phone = ($request->has('phone') ? $request->get('phone') : null);
-            $mailRecord->email = ($request->has('email') ? $request->get('email') : null);
+            $mailRecord->message = $request->input('message');
+            $mailRecord->phone = $request->input('phone');
+            $mailRecord->email = $request->input('email');
             $mailRecord->new = true;
             if (!$mailRecord->save()) {
                 return ['error' => 'cannot save message'];
@@ -22,15 +22,14 @@ class RequestController extends Controller
 
             ini_set("SMTP", env('SMTP'));
             ini_set("sendmail_from", env('ADMIN_EMAIL'));
-            $message = $request->get('message');
+            $message = $request->input('message');
             $headers = "From:" . env('ADMIN_EMAIL');
 
             $res = mail("luthenkoev@gmail.com", "Новая заявка на аренду недвижимости", $message, $headers);
-            echo ($res) ? "Почта отправлена" : "Почта не отправлена";
 
-            return ['sended' => $res];
+            return ['result' => $res ? "Заявка отправлена успешно" : "Заявка не отправлена"];
         }catch (\Exception $e){
-            return ['error'=>$e->getMessage()];
+            return ['error' => $e->getMessage()];
         }
     }
 

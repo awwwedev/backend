@@ -4,10 +4,10 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class UserCollection extends ResourceCollection
+class TicketMessageCollection extends ResourceCollection
 {
-    public $collects = UserResource::class;
 
+    public $collects = TicketMessageResource::class;
     /**
      * Transform the resource collection into an array.
      *
@@ -16,6 +16,6 @@ class UserCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection;
+        return parent::toArray($request);
     }
 }
