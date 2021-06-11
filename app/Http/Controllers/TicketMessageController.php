@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TicketMessageCollection;
+use App\Models\Role;
+use App\Models\Ticket;
 use App\Models\TicketMessage;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TicketMessageController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return TicketMessageCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $builder = null;
+
+        if ($request->has('ticket_user_id')) {
+            $user = User::query()->find($request->ticket_user_id);
+            $builder = $user->ticket()->with('messages')->first()->messages()->orderBy('created_at', 'asc');
+        }
+        return TicketMessageCollection::make($builder->get());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -35,7 +37,15 @@ class TicketMessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $newMessage = TicketMessage::make([ 'message' => $request->message, 'user_id' => Auth::user()->id ]);
+        $user = User::query()->find($request->ticket_user_id);
+        $ticket = $user->ticket;
+        $ticket->status = Auth::user()->role->role === Role::ADMIN ? Ticket::STATE_WAITING : Ticket::STATE_NEW;
+
+        $ticket->messages()->save($newMessage);
+        $ticket->save();
+
+        return $newMessage;
     }
 
     /**
@@ -49,16 +59,6 @@ class TicketMessageController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\TicketMessage  $ticketMessage
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(TicketMessage $ticketMessage)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.

@@ -108,10 +108,4 @@ class UserController extends Controller
     {
         return Auth::user();
     }
-
-    public function ticketMessages(Request $request, User $user)
-    {
-        $builder = $user->ticket()->with('messages')->first()->messages()->orderBy('created_at', 'asc');
-        return TicketMessageCollection::make($builder->get());
-    }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\RealtyTypeController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketMessageController;
 use App\Http\Controllers\UserController;
 use App\Models\Role;
 use App\Models\User;
@@ -52,6 +53,7 @@ Route::middleware(['auth:sanctum'])->group(
         Route::get('user/byToken', [UserController::class, 'byToken']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('user/{user}/messages', [UserController::class, 'ticketMessages']);
+        Route::apiResource('auth/ticket-message', TicketMessageController::class)->only(['index', 'store']);
 
 
         Route::middleware(['tenant'])->group(
