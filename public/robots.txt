@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /admin-panel/
+Disallow: /lc/
+Allow: /news/
+Allow: /view-realty/
+Allow: /catalog/
+Sitemap: https://technoparkmayak.info/sitemap.xml
