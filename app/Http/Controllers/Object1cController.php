@@ -116,16 +116,12 @@ class Object1cController extends Controller
             if (!$object) {
                 throw new \Exception('Not found Object');
             }
-            $document = Http::get(
-                env('HOST1CGETDOCUMENTS'),
-                [
-                    'object_id' => $object_id,
-                    'user_id' => $user->id
-                ]
-            );
-            $response=new Response($document);
-            $response->headers->set('Content-type' , 'application/pdf');
-            return $response;
+            $data=http_build_query([
+                                       'object_id' => $object_id,
+                                       'user_id' => $user->id
+                                   ]);
+            $ref = env('HOST1CGETDOCUMENTS').'?'.$data;
+            return ['href'=>$ref];
         } catch (\Exception $e) {
             $log = new Logger('error');
             $log->pushHandler(new StreamHandler(__DIR__.'/../../../logs/error', Logger::ERROR));
@@ -166,18 +162,14 @@ class Object1cController extends Controller
             if (!$object) {
                 throw new \Exception('Not found Object');
             }
-            $document = Http::get(
-                env('HOST1CGETBILL'),
-                [
-                    'object_id' => $object_id,
-                    'user_id' => $user->id,
-                    'type'=>$type,
-                    'bill_id'=>$billId
-                ]
-            );
-            $response=new Response($document);
-            $response->headers->set('Content-type' , 'application/pdf');
-            return $response;
+            $data=http_build_query([
+                                       'object_id' => $object_id,
+                                       'user_id' => $user->id,
+                                       'type'=>$type,
+                                       'bill_id'=>$billId
+                                   ]);
+            $ref = env('HOST1CGETDOCUMENTS').'?'.$data;
+            return ['href'=>$ref];
         } catch (\Exception $e) {
             $log = new Logger('error');
             $log->pushHandler(new StreamHandler(__DIR__.'/../../../logs/error', Logger::ERROR));
@@ -231,7 +223,6 @@ class Object1cController extends Controller
                 ]
             );
             $response=new Response($document);
-            $response->headers->set('Content-type' , 'application/pdf');
             return $response;
         } catch (\Exception $e) {
             $log = new Logger('error');
@@ -285,13 +276,12 @@ class Object1cController extends Controller
                 ]
             );
             $response=new Response($document);
-            $response->headers->set('Content-type' , 'application/pdf');
             return $response;
         } catch (\Exception $e) {
             $log = new Logger('error');
             $log->pushHandler(new StreamHandler(__DIR__.'/../../../logs/error', Logger::ERROR));
             $log->error(
-                'getContract',
+                'debts',
                 [
                     'error' => $e->getMessage(),
                     'user' => $user,
