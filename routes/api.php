@@ -4,10 +4,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\Object1cController;
 use \App\Http\Controllers\RealtyController;
 use App\Http\Controllers\RealtyTypeController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SlideController;
+use App\Http\Controllers\TicketMessageController;
 use App\Http\Controllers\UserController;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
@@ -49,11 +51,10 @@ Route::middleware(['auth:sanctum'])->group(
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('user/{user}/messages', [UserController::class, 'ticketMessages']);
         Route::apiResource('auth/ticket-message', TicketMessageController::class)->only(['index', 'store']);
-
+        Route::apiResource('objects1c', Object1cController::class)->only(['index', 'show']);
 
         Route::middleware(['tenant'])->group(
             function () {
-                Route::apiResource('object1cs', Object1cController::class)->only(['index', 'show']);
 
                 Route::get('contract', [Object1cController::class, 'getContract']);
                 Route::get('check', [Object1cController::class, 'getBill']);
@@ -68,8 +69,8 @@ Route::middleware(['auth:sanctum'])->group(
         Route::middleware(['admin'])->group(
             function () {
                 Route::get('obj1c/all', [Object1cController::class, 'getAll']);
-                Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
 
+                Route::apiResource('objects1c', Object1cController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('user', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
                 Route::apiResource('realty', RealtyController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('realtyType', RealtyTypeController::class)->only(['update', 'store', 'destroy']);

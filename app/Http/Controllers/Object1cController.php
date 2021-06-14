@@ -25,9 +25,11 @@ class Object1cController extends Controller
      *
      * @return mixed
      */
-    public function index()
+    public function index(Request $request)
     {
-        return User::where('id', Auth::user()->getAuthIdentifier())->first()->object1cs;
+        $id = $request->input('user_id', Auth::user()->getAuthIdentifier());
+
+        return User::where('id', $id)->first()->object1cs ?? [];
     }
 
     /**
@@ -47,6 +49,7 @@ class Object1cController extends Controller
         }
         $object1c->user_id = $request->input('user_id');
         $object1c->save();
+
         return $object1c;
     }
 
@@ -78,6 +81,7 @@ class Object1cController extends Controller
             $object1c->user_id = $request->input('user_id');
         }
         $object1c->save();
+
         return $object1c;
     }
 
@@ -90,7 +94,7 @@ class Object1cController extends Controller
      */
     public function destroy(Object1c $object1c)
     {
-        $object1c->delete();
+        return $object1c->delete();
     }
 
     public function getAll()

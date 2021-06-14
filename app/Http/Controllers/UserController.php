@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\RealtyResource;
-use App\Http\Resources\TicketMessageCollection;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
-use App\Models\Realty;
+use App\Models\Object1c;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+
 
 class UserController extends Controller
 {
@@ -52,6 +49,10 @@ class UserController extends Controller
 
         if ($user->save()) {
             $user->ticket()->save(new Ticket());
+            if (is_array($request->objects)) {
+                $objects = collect($request->objects)->map(fn ($object) => Object1c::make($object));
+                $user->object1cs()->attach($objects);
+            }
 
             return $user;
         } else {
@@ -63,11 +64,11 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param User $user
-     * @return User
+     * @return UserResource
      */
-    public function show(User $user): User
+    public function show(User $user): UserResource
     {
-        return $user;
+        return new UserResource($user);
     }
 
     /**
@@ -75,7 +76,7 @@ class UserController extends Controller
      *
      * @param Request $request
      * @param User $user
-     * @return User|Response
+     * @return UserResource
      */
     public function update(Request $request, User $user)
     {
@@ -83,12 +84,22 @@ class UserController extends Controller
         $user->phone = $request->input('phone', null);
         $user->email = $request->input('email');
         $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
+        $originObjects = $user->object1cs()->get(['id_1c'])->map(fn ($obj) => (string)($obj->id_1c));
 
         if ($request->input('password'))
             $user->password = Hash::make($request->input('password'));
 
         if ($user->save()) {
-            return $user;
+            if (is_array($request->objects)) {
+                $objects = collect($request->objects);
+                $objectModels = $objects->diff($originObjects)->map(fn ($object) => Object1c::make([ 'id_1c' => $object, 'name' => 'test' ]));
+                $objectsToRemove = $originObjects->diff($objects);
+
+                $user->object1cs()->saveMany($objectModels);
+                Object1c::query()->whereIn('id_1c', $objectsToRemove->toArray())->delete();
+            }
+
+            return new UserResource($user);
         } else {
             return new Response(json_encode($user->errors()->all()), 400);
         }
@@ -112,6 +123,6 @@ class UserController extends Controller
      */
     public function byToken()
     {
-        return Auth::user();
+        return new UserResource(Auth::user());
     }
 }

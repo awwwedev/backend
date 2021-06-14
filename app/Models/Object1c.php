@@ -9,6 +9,8 @@ class Object1c extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     /**
      * Get the own User
      */

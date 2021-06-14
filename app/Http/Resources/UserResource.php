@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             parent::toArray($request),
             [
                 'role' => $this->role->role,
+                'objects' => $this->object1cs ?? [],
                 'hasNewMessage' => $this->when($request->has('withHasNewMessage'),
                     $this->ticket()->whereStatus(Ticket::STATE_NEW)->count()
                 )
