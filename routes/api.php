@@ -39,9 +39,6 @@ Route::apiResource('slide', SlideController::class)->only(['index', 'show']);
 Route::apiResource('contact', ContactController::class)->only(['index', 'show']);
 Route::apiResource('realty', RealtyController::class)->only(['index', 'show']);
 Route::apiResource('equipment', EquipmentController::class)->only(['index', 'show']);
-Route::apiResource('ticket', TicketController::class)->only(['index', 'store']);
-Route::get('ticket/count', [TicketController::class, 'count']);
-
 
 Route::middleware(['auth:sanctum'])->group(
     function () {
@@ -73,10 +70,13 @@ Route::middleware(['auth:sanctum'])->group(
                 Route::get('obj1c/all', [Object1cController::class, 'getAll']);
                 Route::apiResource('objects1c', UserController::class)->only(['show', 'update', 'store', 'destroy']);
 
-
-                Route::apiResource('user', UserController::class)
-                    ->only(['index', 'show', 'update', 'store', 'destroy']);
                 Route::apiResource('user', UserController::class)->only(['index', 'show', 'update', 'store', 'destroy']);
+                Route::apiResource('realty', RealtyController::class)->only(['update', 'store', 'destroy']);
+                Route::apiResource('realtyType', RealtyTypeController::class)->only(['update', 'store', 'destroy']);
+                Route::apiResource('news', NewsController::class)->only(['update', 'store', 'destroy']);
+                Route::apiResource('equipment', EquipmentController::class)->only(['update', 'store', 'destroy']);
+                Route::apiResource('slide', SlideController::class)->only(['update', 'store', 'destroy']);
+                Route::apiResource('contact', ContactController::class)->only(['update', 'store', 'destroy']);
                 Route::get('role', function () { return Role::all(); });
 
                 Route::delete('realty', [RealtyController::class, 'destroyMultiple']);

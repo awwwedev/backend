@@ -17,6 +17,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use phpDocumentor\Reflection\Types\Boolean;
 
 
 class RealtyController extends Controller
@@ -54,6 +55,7 @@ class RealtyController extends Controller
             return '/storage/' . $file->store('images/realty', 'public');
         });
         $realty->user_id = Auth::user()->id;
+        $realty->is_published = $request->is_published === 'true' ? 1 : 0;
 
         $realty->save();
 
@@ -61,7 +63,7 @@ class RealtyController extends Controller
             $realty->equipments()->attach($request->equipments);
         }
 
-        return RealtyResource::make($realty);
+        return RealtyResource::make(Realty::find($realty->id));
     }
 
     /**
@@ -84,7 +86,8 @@ class RealtyController extends Controller
      */
     public function update(Request $request, Realty $realty)
     {
-        $realty = $realty->fill($request->only(['name', 'short_description', 'discount_sum', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
+        $realty = $realty->fill($request->only(['name', 'is_published', 'short_description', 'discount_sum', 'description', 'price', 'photo', 'area', 'price_per_metr', 'type_id', 'longitude', 'latitude']));
+        $realty->is_published = $request->is_published === 'true' ? 1 : 0;
         $realtyEquipIds = collect($realty->equipments()->get())->map(function ($model) {
             return $model->id;
         });
@@ -124,7 +127,7 @@ class RealtyController extends Controller
             return response('Не удалось обновить запись', 400);
         }
 
-        return RealtyResource::make($realty);
+        return RealtyResource::make(Realty::find($realty->id));
     }
 
     /**

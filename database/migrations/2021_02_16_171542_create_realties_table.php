@@ -25,6 +25,7 @@ class CreateRealtiesTable extends Migration
             $table->text('latitude');
             $table->text('longitude');
             $table->text("short_description");
+            $table->boolean("is_published")->default(false);
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->json('photo');
             $table->unsignedBigInteger('type_id');
