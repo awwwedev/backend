@@ -159,8 +159,12 @@ class RealtyTest extends TestCase
         $data = collect($response->json()['data']);
 
         self::assertTrue($data->every(function($item) use ($equips) {
-            $resEquips = collect($item['equipments'])->map(fn($_item) => $_item['id']);
-            return $resEquips->contains(fn($value) => $value === $equips[0] or $value === $equips[1]);
+            $resEquips = collect($item['equipments'])->map(function ($_item) {
+                return $_item['id'];
+            });
+            return $resEquips->contains(function ($value) use ($equips) {
+                return $value === $equips[0] or $value === $equips[1];
+            });
         }));
     }
 

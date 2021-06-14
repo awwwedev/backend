@@ -50,7 +50,9 @@ class UserController extends Controller
         if ($user->save()) {
             $user->ticket()->save(new Ticket());
             if (is_array($request->objects)) {
-                $objects = collect($request->objects)->map(fn ($object) => Object1c::make($object));
+                $objects = collect($request->objects)->map(function ($object) {
+                    return Object1c::make($object);
+                });
                 $user->object1cs()->attach($objects);
             }
 
@@ -84,7 +86,9 @@ class UserController extends Controller
         $user->phone = $request->input('phone', null);
         $user->email = $request->input('email');
         $user->role_id = $request->input('role_id', Role::where('role', Role::TENANT)->first());
-        $originObjects = $user->object1cs()->get(['id_1c'])->map(fn ($obj) => (string)($obj->id_1c));
+        $originObjects = $user->object1cs()->get(['id_1c'])->map(function ($obj) {
+            return (string)($obj->id_1c);
+        });
 
         if ($request->input('password'))
             $user->password = Hash::make($request->input('password'));
@@ -92,7 +96,9 @@ class UserController extends Controller
         if ($user->save()) {
             if (is_array($request->objects)) {
                 $objects = collect($request->objects);
-                $objectModels = $objects->diff($originObjects)->map(fn ($object) => Object1c::make([ 'id_1c' => $object, 'name' => 'test' ]));
+                $objectModels = $objects->diff($originObjects)->map(function ($object) {
+                    return Object1c::make(['id_1c' => $object, 'name' => 'test']);
+                });
                 $objectsToRemove = $originObjects->diff($objects);
 
                 $user->object1cs()->saveMany($objectModels);

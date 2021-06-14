@@ -227,6 +227,9 @@ class RealtyController extends Controller
         if ($request->has('types')) {
             $realty->whereIn('type_id', $request->get('types'));
         }
+        if ($request->has('is_published')) {
+            $realty->where('is_published', 1);
+        }
         if ($request->has('exceptedId')) {
             $realty->whereNotIn('id', $request->get('exceptedId'));
         }
