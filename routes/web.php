@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('make-storage', function () {
+    return \Illuminate\Support\Facades\Artisan::call('storage:link');
+});
+
 Route::get('/admin/{any?}', function () {
     return view('admin-panel');
 })->where('any', '.+');

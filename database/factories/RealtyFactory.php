@@ -43,6 +43,7 @@ class RealtyFactory extends Factory
             'longitude' => mt_rand( 33450000, 33700000) / 1000000,
             'short_description' => $this->faker->unique()->realText(),
             'user_id' => 1,
+            'is_published' => $this->faker->boolean(),
             'img_path' => $this->faker->randomElement($photos),
             'type_id' => random_int(1, 4),
             'photo'=> $this->faker->randomElements($photos, 3),
