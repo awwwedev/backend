@@ -28,13 +28,6 @@ class TicketController extends Controller
         return $builder->paginate($perPage);
     }
 
-    public function count(Request $request): int
-    {
-        $builder = $this->attachFilterByFields(['user_id', 'status'], $request, Ticket::query());
-
-        return $builder->count();
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -52,9 +45,16 @@ class TicketController extends Controller
      * @param  \App\Models\Ticket  $ticket
      * @return Response
      */
-    public function show(Ticket $ticket)
+    public function show(Request $request, Ticket $ticket)
     {
-        //
+        $builder = Ticket::query();
+
+        if ($request->user_id)
+            $builder->where('user_id', $request->user_id);
+        if ($request->id)
+            $builder->where('id', $request->id);
+
+        return $builder->first();
     }
 
     /**
@@ -62,11 +62,15 @@ class TicketController extends Controller
      *
      * @param Request $request
      * @param  \App\Models\Ticket  $ticket
-     * @return Response
+     * @return Ticket
      */
     public function update(Request $request, Ticket $ticket)
     {
-        //
+        $ticket->status = $request->status;
+
+        $ticket->update();
+
+        return $ticket;
     }
 
     /**

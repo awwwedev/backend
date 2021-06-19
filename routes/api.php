@@ -9,6 +9,7 @@ use \App\Http\Controllers\RealtyController;
 use App\Http\Controllers\RealtyTypeController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SlideController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketMessageController;
 use App\Http\Controllers\UserController;
 use App\Models\Role;
@@ -26,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login', [AuthController::class, 'login']);
-Route::post('mail', [RequestController::class, 'index']);
+Route::post('request', [RequestController::class, 'store']);
 Route::prefix('realty')->group(
     function () {
         Route::get('map', [RealtyController::class, 'mapRealty']);
@@ -78,7 +79,10 @@ Route::middleware(['auth:sanctum'])->group(
                 Route::apiResource('equipment', EquipmentController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('slide', SlideController::class)->only(['update', 'store', 'destroy']);
                 Route::apiResource('contact', ContactController::class)->only(['update', 'store', 'destroy']);
+                Route::apiResource('request', RequestController::class)->only(['index', 'update', 'destroy', 'show']);
+                Route::apiResource('ticket', TicketController::class)->only(['update']);
                 Route::get('role', function () { return Role::all(); });
+                Route::get('ticket', [TicketController::class, 'show']);
 
                 Route::delete('realty', [RealtyController::class, 'destroyMultiple']);
                 Route::delete('realtyType', [RealtyTypeController::class, 'destroyMultiple']);

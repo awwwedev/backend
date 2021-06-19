@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             [
                 'role' => $this->role->role,
                 'objects' => $this->object1cs ?? [],
+                'ticketStatus' => $this->ticket->status,
                 'hasNewMessage' => $this->when($request->has('withHasNewMessage'),
                     $this->ticket()->whereStatus(Ticket::STATE_NEW)->count()
                 )

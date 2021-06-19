@@ -19,6 +19,8 @@ class CreateRequestsTable extends Migration
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->boolean('new')->default(true);
+            $table->unsignedBigInteger('realtie_id');
+            $table->foreign('realtie_id')->references('id')->on('realties');
             $table->timestamps();
         });
     }
