@@ -90,6 +90,7 @@ Route::middleware(['auth:sanctum'])->group(
                 Route::delete('equipment', [EquipmentController::class, 'destroyMultiple']);
                 Route::delete('slide', [SlideController::class, 'destroyMultiple']);
                 Route::delete('contact', [ContactController::class, 'destroyMultiple']);
+                Route::delete('request', [RequestController::class, 'destroyMultiple']);
             }
         );
     }

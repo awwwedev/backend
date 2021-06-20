@@ -16,7 +16,7 @@ class CreateObject1csTable extends Migration
         Schema::create('object1cs', function (Blueprint $table) {
             $table->id();
             $table->string('id_1c');
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
             $table->timestamps();
         });

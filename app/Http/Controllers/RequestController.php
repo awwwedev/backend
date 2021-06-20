@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\RequestCollection;
 use App\Models\Request as RequestModel;
 use App\Traits\ControllersUpgrade\Searching;
 use App\Traits\ControllersUpgrade\Sorting;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -20,7 +22,7 @@ class RequestController extends Controller
         $builder = $this->attachSearching($builder, $request);
         $perPage = $request->get('perPage') ?? 10;
 
-        return $builder->paginate($perPage);
+        return RequestCollection::make($builder->paginate($perPage));
     }
 
     /**
@@ -88,16 +90,18 @@ class RequestController extends Controller
         return $mailRecord;
     }
 
-
-
     /**
      * Remove the specified resource from storage.
      *
-     * @param RequestModel $request
-     * @return Response
+     * @param Request $request
+     * @return int
+     * @throws Exception
      */
-    public function destroy(Request $request)
+    public function destroyMultiple(Request $request): int
     {
-        //
+        return RequestModel::select(['id'])->whereIn('id', $request->id)->get()
+            ->each(function (RequestModel $model) {
+                $model->delete();
+            })->count();
     }
 }
