@@ -21,6 +21,10 @@ Route::get('/admin/{any?}', function () {
     return view('admin-panel');
 })->where('any', '.+');
 
+Route::get('/lc/{any?}', function () {
+    return view('lc');
+})->where('any', '.+');
+
 Route::get('/{any?}', function () {
     return view('index');
 })->where('any', '.+');
